@@ -1,87 +1,26 @@
 #include <iostream>
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include "glframework/core.h"
+#include "application/application.h"
+#include "glframework/shader.h"
 
 using namespace std;
 
-GLuint program =0,vao = 0;
-void prepareVBO() {
-	GLuint vbo = 0;
-	glGenBuffers(1, &vbo);
-	glDeleteBuffers(1, &vbo);
-}
+GLuint vao = 0;
+Shader* shader = nullptr;
 void prepareShader() {
-	const char* vertexShaderSource =
-		"#version 460 core \n"
-		"layout (location = 0) in vec3 aPos;\n"
-		"layout (location = 1) in vec3 aColor;\n"
-		"out vec3 color;\n"
-		"void main()\n"
-		"{\n"
-		"gl_Position = vec4(aPos.x,aPos.y,aPos.z,1.0);\n"
-		"color = aColor;\n"
-		"}\0";
-	const char* fragmentShaderSource =
-		"#version 330 core\n"
-		"out vec4 FragColor;\n"
-		"in vec3 color;\n"
-		"void main()\n"
-		"{\n"
-		"FragColor = vec4(color,1.0f);\n"
-		"}\n";
-
-	//2创建Shader程序（vs fs)
-	GLuint vertex, fragment;
-	vertex = glCreateShader(GL_VERTEX_SHADER);
-	fragment = glCreateShader(GL_FRAGMENT_SHADER);
-
-	//3 为shader程序输入代码
-
-	glShaderSource(vertex, 1, &vertexShaderSource, NULL);
-	glShaderSource(fragment, 1, &fragmentShaderSource, NULL);
-
-	int success = 0;
-	char infoLog[1024];
-	glCompileShader(vertex);
-	glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
-	if (!success) {
-		glGetShaderInfoLog(vertex, 1024, NULL, infoLog);
-		std::cout << "Error compile:" << infoLog << std::endl;
-	}
-
-	glCompileShader(fragment);
-	glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
-	if (!success) {
-		glGetShaderInfoLog(fragment, 1024, NULL, infoLog);
-		std::cout << "Error fragment:" << infoLog << std::endl;
-	}
-
-
-	//5 创建一个Program 壳子
-	program = glCreateProgram();
-
-	//6 放入壳子中
-	glAttachShader(program, vertex);
-	glAttachShader(program, fragment);
-
-	//7 链接
-	glLinkProgram(program);
-
-	//8 清理
-	glDeleteShader(vertex);
-	glDeleteShader(fragment);
-	
+	shader = new Shader("assets/shader/vertex.glsl","assets/shader/fragment.glsl");
 }
 
 void render() {
 	glClear(GL_COLOR_BUFFER_BIT);
-	glUseProgram(program);
+	shader->begin();
 	//绑定当前vao
 	glBindVertexArray(vao);
 	//绘制
 	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 
+	shader->end();
 }
 void prepare() {
 	float vertices[] = {
@@ -131,25 +70,15 @@ void prepare() {
 
 }
 int main() {
-	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	auto window = glfwCreateWindow(800, 600, "OpenglLearn", NULL, NULL);
-	glfwMakeContextCurrent(window);
-	
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-		cerr << "Failed to initialize GLAD!" << endl;
-		return -1;
-	}
+	if (!myapp->init()) return -1;
+
+	glViewport(0, 0, 800, 600);
+	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	prepareShader();
 	prepare();
-	while (!glfwWindowShouldClose(window)) {
+	while (myapp->update()) {
 		render();
-
-		glfwSwapBuffers(window);
-		glfwPollEvents();
 	}
-	glfwTerminate();
+	myapp->destroy();
 	return 0;
 }
