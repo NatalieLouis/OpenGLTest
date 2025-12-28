@@ -94,3 +94,24 @@ void Shader::begin() {
 void Shader::end() {
 	glUseProgram(0);
 }
+
+void Shader::setFloat(const std::string& name, float value) {
+	GLint location = glGetUniformLocation(mProgram, name.c_str());
+	glUniform1f(location, value);
+}
+
+void Shader::setVector3(const std::string& name, float x, float y, float z) {
+	GLint location = glGetUniformLocation(mProgram, name.c_str());
+	glUniform3f(location, x, y, z);
+}
+
+void Shader::setVector3(const std::string& name, const float* values) {
+	GLint location = glGetUniformLocation(mProgram, name.c_str());
+	glUniform3fv(location,1,values);
+
+}
+
+void Shader::setInt(const std::string& name, int value) {
+	GLint location = glGetUniformLocation(mProgram, name.c_str());
+	glUniform1i(location, value);
+}

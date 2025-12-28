@@ -20,6 +20,6 @@ link_directories(
 	SYSTEM ${CMAKE_CURRENT_SOURCE_DIR}/thirdParty/lib
 )
 
-add_executable(OpenGL_Test "main.cpp" "glad.c")
+add_executable(OpenGL_Test "main.cpp" "glad.c" "wrapper/checkError.h")
 
 target_link_libraries(OpenGL_Test glfw3.lib application fw )

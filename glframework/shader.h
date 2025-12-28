@@ -9,7 +9,10 @@ public:
 
 	void begin();
 	void end();
-
+	void setFloat(const std::string& name,float value);
+	void setVector3(const std::string& name, float x, float y, float z);
+	void setVector3(const std::string& name, const float* values);
+	void setInt(const std::string& name, int value);
 private:
 	enum class Type {
 		COMPILE = 0,
