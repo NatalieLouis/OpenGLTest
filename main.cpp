@@ -2,43 +2,20 @@
 #include "glframework/core.h"
 #include "application/application.h"
 #include "glframework/shader.h"
-
-#define STB_IMAGE_IMPLEMENTATION
-#include "application/stb_image.h"
+#include "glframework/texture.h"
 
 using namespace std;
 
 GLuint vao = 0;
 GLuint texture;
 Shader* shader = nullptr;
+Texture* textureShader = nullptr;
 void prepareShader() {
 	shader = new Shader("assets/shader/vertex.glsl","assets/shader/fragment.glsl");
 }
 
 void prepareTexture() {
-	int width, height, channels;
-	stbi_set_flip_vertically_on_load(true);
-
-	unsigned char* data = stbi_load("assets/Textures/test.jpg",&width,&height,&channels,STBI_rgb_alpha);
-	if (!data) {
-		std::cerr << "Failed to load texture\n";
-	}
-
-	glGenTextures(1, &texture);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture);
-
-	//开启显存
-	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,data);
-
-	stbi_image_free(data);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);//u
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);//v
+	textureShader = new Texture("assets/Textures/test.jpg", 0);
 }
 
 void render() {
@@ -52,7 +29,7 @@ void render() {
 	//绑定当前vao
 	glBindVertexArray(vao);
 	//绘制
-	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 
 	shader->end();
@@ -61,18 +38,21 @@ void prepare() {
 	float vertices[] = {
 		-0.5,-0.5,0,
 		0.5,-0.5,0,
-		0,0.5,0
+		0.5,0.5,0,
+		-0.5,0.5,0
 	};
 	float color[] = {
 	 1.0f,0.0f,0.0f,
 	 0.0f,1.0f,0.0f,
-	 0.0f,0.0f,1.0f
+	 0.0f,0.0f,1.0f,
+	 0.0f,0.0f,1.0f,
 	};
 
 	float uvs[] = {
 		0.0f,0.0f,
 		1.0f,0.0f,
-		0.5f,1.0f,
+		1.0f,1.0f,
+		0.0f,1.0f
 	};
 
 	GLuint vbo , color_vbo,uv_vbo;
@@ -90,6 +70,7 @@ void prepare() {
 
 	unsigned int indices[] = {
 		0,1,2,
+		2,3,0
 	};
 
 	GLuint ebo;
@@ -132,6 +113,7 @@ int main() {
 	while (myapp->update()) {
 		render();
 	}
+	delete textureShader;
 	myapp->destroy();
 	return 0;
 }
